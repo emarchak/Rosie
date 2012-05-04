@@ -1,3 +1,0 @@
-[submodule "modules/custom/twilio"]
-	path = modules/custom/twilio
-	url = git@github.com:emarchak/twilio.git
