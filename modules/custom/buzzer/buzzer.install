@@ -1,0 +1,58 @@
+<?php
+/**
+ * @file
+ * Install and uninstall functions for the buzzer module.
+ *
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function buzzer_enable() {
+  // Check if our field is not already created.
+  if (!field_info_field('field_buzzercode')) {
+    $field = array(
+        'field_name' => 'field_buzzercode', 
+        'type' => 'text', 
+    );
+    
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+        'field_name' => 'field_buzzercode', 
+        'entity_type' => 'user', 
+        'label' => t('Buzzer Code'),
+        'description' => t('Your preferred buzzer code to get into the front door.'),
+        'settings' => array(
+          'maxlength' => 4,
+          'size' => 4
+        ),  
+        'bundle' => 'user', 
+        // If you don't set the "required" property then the field wont be required by default.
+        'required' => TRUE,
+        'settings' => array(
+           // Here you inform either or not you want this field showing up on the registration form.
+            'user_register_form' => 1,
+        ),
+        'widget' => array(
+            'type' => 'textfield',
+        ), 
+    );
+    field_create_instance($instance);
+  }
+
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function buzzer_disable() {
+ 
+  $field = 'field_buzzercode';
+  
+  field_delete_field($field);
+  
+  field_purge_batch(10);
+  
+};

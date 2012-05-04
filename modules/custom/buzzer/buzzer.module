@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Implimentation of hook_field_info_alter
+ */
 function buzzer_menu() {
   $items['admin/config/system/buzzer'] = array(
     'title' => t('Buzzer'),
@@ -40,17 +42,100 @@ function buzzer_twilio_voice_incoming() {
  * Processes a buzzer response
  */
 function buzzer_receive_voice_response() {
-  if (!empty($_GET['Digits'])) {
-    if ($_GET['Digits'] == 123) {
-    echo '
-    	<Response>
-        <Say>'.
-          variable_get('msg_confirm').
-        '</Say>
-        <Play loop="3">'.
-          variable_get('buzzer_path').
-        '</Play>
-      </Response>';
+
+  $_GET['Digits'] = $buzz;
+  
+  if (!empty($buzz)) {
+    
+    $result = db_query('SELECT n.entity_id FROM {field_data_field_buzzercode} n WHERE n.field_buzzercode_value = :buzz', array(':buzz' => $buzz)); 
+
+    foreach($result as $record) {
+      $uid = (integer) $record;
+    }
+    
+    if (!empty($uid)) {
+  
+      $username = field_get_items('user', $uid, 'field_firstname');
+    
+      $msg_confirm = variable_get('msg_confirm');
+  
+      echo '
+      	<Response>
+          <Say>'.
+            t($msg_confirm, array('@name' => $username));
+          '</Say>
+          <Play loop="3">'.
+            variable_get('buzzer_path').
+          '</Play>
+        </Response>';
     }
   }
 }
+
+/**
+ * Implements hook_field_validate().
+ *
+ * This hook gives us a chance to validate content that's in our
+ * field. We're really only interested in the $items parameter, since
+ * it holds arrays representing content in the field we've defined.
+ * We want to verify that the items only contain RGB hex values like
+ * this: #RRGGBB. If the item validates, we do nothing. If it doesn't
+ * validate, we add our own error notification to the $errors parameter.
+ *
+ * @see field_example_field_widget_error()
+ *
+function buzzer_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+dsm($items);
+dsm($field);
+  foreach ($items as $delta => $item) {
+    if (!empty($item['field_buzzercode'])) {
+      if (strlen($item['field_buzzercode']) !==  4 ) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'field_buzzer_invalid',
+          'message' =>  t('Your buzzer code must be four digits.'),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_error().
+ *
+ * hook_field_widget_error() lets us figure out what to do with errors
+ * we might have generated in hook_field_validate(). Generally, we'll just
+ * call form_error().
+ *
+ * @see field_example_field_validate()
+ * @see form_error()
+ *
+function buzzer_field_widget_error($element, $error, $form, &$form_state) {
+  switch ($error['error']) {
+    case 'buzzer_invalid':
+      form_error($element, $error['message']);
+      break;
+  }
+}
+
+*/
+
+/**
+ * Implements hook_FORMID_form_alter()
+ */
+function buzzer_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+
+    $form['#validate'][] = 'buzzer_validate_passcode';
+    
+}
+
+
+/**
+ * Validation handler for the buzzer code
+ */
+function buzzer_validate_passcode($form, &$form_state) {
+dsm($form_state['values']['field_buzzercode']['und']['0']['value']);
+  if (strlen($form_state['values']['field_buzzercode']['und']['0']['value']) !==  4 ) {
+    form_set_error('buzzer', t('Your buzzer code must be four digits.'));
+  }
+
+};
