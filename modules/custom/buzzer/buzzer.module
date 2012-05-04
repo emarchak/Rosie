@@ -133,7 +133,6 @@ function buzzer_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
  * Validation handler for the buzzer code
  */
 function buzzer_validate_passcode($form, &$form_state) {
-dsm($form_state['values']['field_buzzercode']['und']['0']['value']);
   if (strlen($form_state['values']['field_buzzercode']['und']['0']['value']) !==  4 ) {
     form_set_error('buzzer', t('Your buzzer code must be four digits.'));
   }
