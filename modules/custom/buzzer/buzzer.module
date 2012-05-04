@@ -1,0 +1,56 @@
+<?php
+
+function buzzer_menu() {
+  $items['admin/config/system/buzzer'] = array(
+    'title' => t('Buzzer'),
+    'description' => t('Administer your buzzer settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('buzzer_admin_form'),
+    'access callback' => TRUE,
+    'file' => 'buzzer.admin.inc',
+  ); 
+  
+  $items['buzzer/response'] = array(
+    'page callback' => 'buzzer_receive_voice_response', 
+    'access callback' => TRUE, 
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Callback for incoming voice calls.
+ */
+function buzzer_twilio_voice_incoming() {
+	echo '
+	<Response>
+    <Gather action="/buzzer/response" method="GET">
+      <Say>'.
+        variable_get('msg_greeting').
+      '</Say>
+    </Gather>
+    <Say>'.
+       variable_get('msg_denied').
+    '</Say>
+  </Response>';
+}
+
+/**
+ * Processes a buzzer response
+ */
+function buzzer_receive_voice_response() {
+  if (!empty($_GET['Digits'])) {
+    if ($_GET['Digits'] == 123) {
+    echo '
+    	<Response>
+        <Say>'.
+          variable_get('msg_confirm').
+        '</Say>
+        <Play loop="3">'.
+          variable_get('buzzer_path').
+        '</Play>
+      </Response>';
+    }
+  }
+}
