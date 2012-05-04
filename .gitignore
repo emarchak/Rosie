@@ -1,3 +1,4 @@
+.DS_Store
 sites/default/files
 sites/default/private
 sites/default/settings.php
@@ -29,4 +30,5 @@ xmlrpc.php
 /profiles
 /scripts
 /themes
+settings.php
 
