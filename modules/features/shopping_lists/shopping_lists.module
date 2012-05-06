@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Shopping List feature.
+ */
+
+include_once('shopping_lists.features.inc');
