@@ -1,5 +1,5 @@
 name = Buzzer controller
 description = Controls the home buzzer system.
-package = automation
+package = Automation
 dependencies[] = twilio
 core = 7.x
